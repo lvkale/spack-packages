@@ -189,6 +189,15 @@ class Charmpp(Package):
         when="backend=reconverse",
         msg="The reconverse backend exists from Charm++ 9 (and the recharm branch) on",
     )
+    # Charm++ 9 is the reconverse-based line: the classic machine layers are
+    # removed from it (charmplusplus/charm#4056), so the only backend there is
+    # reconverse. Classic backends remain available through @classic and @:8.
+    requires(
+        "backend=reconverse",
+        when="@9:,recharm",
+        msg="Charm++ 9 and the recharm branch build only on the reconverse backend; "
+        "use @classic or an 8.x release for the classic machine layers",
+    )
     conflicts("backend=reconverse", when="~smp", msg="The 'reconverse' backend always uses SMP")
     # With --build-shared, libreconverse.dylib/.so is written to lib_so/ only,
     # but charmc links it with -lreconverse against lib/, so linking the
