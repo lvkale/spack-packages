@@ -26,25 +26,20 @@ class Charmpp(Package):
     maintainers("matthiasdiener")
     # relicensed from a non-commercial license to Apache-2.0 in May 2024, after v7.0.0
     license("LicenseRef-Charmpp-Non-Commercial", when="@6:7.0", checked_by="tgamblin")
-    license("Apache-2.0 WITH LLVM-exception", when="@7.1:,classic,recharm", checked_by="tgamblin")
+    license("Apache-2.0 WITH LLVM-exception", when="@7.1:", checked_by="tgamblin")
     redistribute(source=False, binary=False, when="@6:7.0")
 
-    # "classic" is the frozen classic Converse line (8.1.0 is its final
-    # release); "recharm" is the default branch and the Charm++ 9.0 line,
-    # built on the reconverse runtime (contrib/reconverse submodule, which
-    # GitHub's release tarballs do not contain, hence git versions).
-    # Neither name is an infinity version, so both sort below 6.5.1: version
-    # ranges in this file close their lower bound at 6 and list the git
-    # versions explicitly where they apply.
-    version(
-        "9.0.0-alpha1",
-        tag="v9.0.0-alpha1",
-        commit="592bb25f28b553f3a5d4242328c4507e76badadf",
-        submodules=True,
-    )
-    version("recharm", branch="recharm", submodules=True)
-    version("classic", branch="classic")
+    # "main" is the development head: the recharm branch, the Charm++ 9.0 line
+    # built on the reconverse runtime (contrib/reconverse submodule), whose build
+    # targets this recipe does not support yet. The frozen classic Converse line
+    # (8.1.0 is its final release) is reachable as charmpp@git.classic.
+    version("main", branch="recharm", submodules=True)
 
+    version(
+        "8.1.0",
+        sha256="cc078d3c2fbffcdae04dad00b6c3fc71dce27fb359edb39739c720b8867e6f7e",
+        url="https://github.com/charmplusplus/charm/archive/refs/tags/v8.1.0.tar.gz",
+    )
     version(
         "8.0.0",
         sha256="e30fc1e921e5cbf3406e792d5b0ca5f211c5d8ffbfc56e56d5501d8118abcaf6",
@@ -155,17 +150,17 @@ class Charmpp(Package):
     # https://github.com/charmplusplus/charm/issues/3645
     # Fix was suggested in https://github.com/charmplusplus/charm/pull/3646 and the same has
     # been implemented in v8.0.0
-    conflicts("%fortran=intel-oneapi-compilers", when="@8:,classic,recharm +fortran")
+    conflicts("%fortran=intel-oneapi-compilers", when="@8: +fortran")
     conflicts(
         "%fortran=aocc@:4.2",
-        when="@8:,classic,recharm +fortran",
+        when="@8: +fortran",
         msg="Charm++ 8.x +fortran fails to build with AOCC 4.2.0 and earlier; "
         "use AOCC 5.0+ or charmpp@8: ~fortran",
     )
 
     # Versions 7.0.0+ use CMake by default when it's available. It's more
     # robust.
-    depends_on("cmake@3.4:", when="@7.0.0:,classic,recharm", type="build")
+    depends_on("cmake@3.4:", when="@7.0.0:", type="build")
 
     depends_on("mpi", when="backend=mpi")
     depends_on("papi", when="+papi")
@@ -185,18 +180,18 @@ class Charmpp(Package):
     depends_on("hwloc", when="backend=reconverse")
     depends_on("cmake@3.12:", when="backend=reconverse", type="build")
     requires(
-        "@9:,recharm",
+        "@9:",
         when="backend=reconverse",
-        msg="The reconverse backend exists from Charm++ 9 (and the recharm branch) on",
+        msg="The reconverse backend exists from Charm++ 9 (and the recharm branch, version main) on",
     )
     # Charm++ 9 is the reconverse-based line: the classic machine layers are
     # removed from it (charmplusplus/charm#4056), so the only backend there is
     # reconverse. Classic backends remain available through @classic and @:8.
     requires(
         "backend=reconverse",
-        when="@9:,recharm",
-        msg="Charm++ 9 and the recharm branch build only on the reconverse backend; "
-        "use @classic or an 8.x release for the classic machine layers",
+        when="@9:",
+        msg="Charm++ 9 (version main is the recharm branch) builds only on the reconverse backend; "
+        "use @git.classic or an 8.x release for the classic machine layers",
     )
     conflicts("backend=reconverse", when="~smp", msg="The 'reconverse' backend always uses SMP")
     # With --build-shared, libreconverse.dylib/.so is written to lib_so/ only,
@@ -305,7 +300,7 @@ class Charmpp(Package):
             ("cnl", "x86_64", "mpi"): "mpi-crayxc",
         }
 
-        if self.spec.satisfies("@6.10:,classic,recharm"):
+        if self.spec.satisfies("@6.10:"):
             versions.update(
                 {
                     ("linux", "x86_64", "ucx"): "ucx-linux-x86_64",
@@ -336,7 +331,7 @@ class Charmpp(Package):
                 }
             )
 
-        if self.spec.satisfies("@7:,classic,recharm"):
+        if self.spec.satisfies("@7:"):
             versions.update(
                 {
                     ("linux", "arm", "mpi"): "mpi-linux-arm7",
@@ -478,7 +473,7 @@ class Charmpp(Package):
         if spec.satisfies("+tracing"):
             options.append("--enable-tracing")
 
-        if self.spec.satisfies("@8:,classic,recharm ~fortran"):
+        if self.spec.satisfies("@8: ~fortran"):
             options.append("--disable-fortran")
 
         # Call "make" via the build script
