@@ -29,12 +29,11 @@ class Charmpp(Package):
     license("Apache-2.0 WITH LLVM-exception", when="@7.1:", checked_by="tgamblin")
     redistribute(source=False, binary=False, when="@:7.0")
 
-    # "classic" is the frozen classic Converse line (8.1.0 is its final
-    # release); "recharm" is the default branch and the Charm++ 9.0 line,
-    # built on the reconverse runtime (contrib/reconverse submodule), whose
-    # build targets this recipe does not support yet.
-    version("recharm", branch="recharm", submodules=True)
-    version("classic", branch="classic")
+    # "main" is the development head: the recharm branch, the Charm++ 9.0 line
+    # built on the reconverse runtime (contrib/reconverse submodule), whose build
+    # targets this recipe does not support yet. The frozen classic Converse line
+    # (8.1.0 is its final release) is reachable as charmpp@git.classic.
+    version("main", branch="recharm", submodules=True)
 
     version(
         "8.1.0",
