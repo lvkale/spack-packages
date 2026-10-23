@@ -30,9 +30,9 @@ class Charmpp(Package):
     redistribute(source=False, binary=False, when="@6:7.0")
 
     # "main" is the development head: the recharm branch, the Charm++ 9.0 line
-    # built on the reconverse runtime (contrib/reconverse submodule), whose build
-    # targets this recipe does not support yet. The frozen classic Converse line
-    # (8.1.0 is its final release) is reachable as charmpp@git.classic.
+    # built on the reconverse runtime (contrib/reconverse submodule). The frozen
+    # classic Converse line (8.1.0 is its final release) is reachable as
+    # charmpp@git.classic.
     version("main", branch="recharm", submodules=True)
 
     version(
@@ -186,7 +186,7 @@ class Charmpp(Package):
     )
     # Charm++ 9 is the reconverse-based line: the classic machine layers are
     # removed from it (charmplusplus/charm#4056), so the only backend there is
-    # reconverse. Classic backends remain available through @classic and @:8.
+    # reconverse. Classic backends remain available through @git.classic and @:8.
     requires(
         "backend=reconverse",
         when="@9:",
